@@ -3,10 +3,16 @@
 =========================== */
 
 :root {
-    --bg: #f5f5f5;
-    --header: #666666;
-    --header-text: #ffffff;
-    --border: #8a8a8a;
+    --header: #636363;
+    --border: #4d4d4d;
+    --bg: #f7f7f7;
+
+    /* JS와 실시간 연동을 위해 기본 컬러 설정 */
+    --otp: #ffd8df;
+    --good: #ffe9c8;
+    --normal: #fff9cd;
+    --pass: #e4f9dc;
+    --mine: #d9f8ff;
 }
 
 * {
@@ -17,24 +23,21 @@
 
 body {
     background: var(--bg);
-    font-family: "Pretendard", "Noto Sans KR", sans-serif;
-    color: #333;
+    font-family: Pretendard, "Noto Sans KR", sans-serif;
     display: flex;
     justify-content: center;
     padding: 40px;
 }
 
 .container {
-    width: fit-content;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    width: min(900px, 95vw);
+    text-align: center;
 }
 
 h1 {
-    font-size: 34px;
+    font-size: 36px;
+    margin-bottom: 30px;
     font-weight: 700;
-    margin-bottom: 26px;
 }
 
 /* ------------------------
@@ -42,87 +45,104 @@ h1 {
 -------------------------*/
 .legend {
     display: flex;
-    gap: 22px;
-    flex-wrap: wrap;
     justify-content: center;
-    margin-bottom: 28px;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+}
+
+.legend-color {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,.08);
 }
 
 /* ------------------------
-   테이블 (PC 기준 - 왼쪽 오리지널 디자인)
+   테이블 (★칸 분리 완벽 차단)
 -------------------------*/
 .table-wrapper {
-    background: #fff;
-    border: 2px solid var(--border);
-    border-radius: 24px;
-    padding: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    display: inline-block;
+    border-radius: 16px; /* 테두리 라운드 예쁘게 축소 */
+    overflow: hidden;    /* 라운드 안으로 표 외곽선 깔끔하게 가두기 */
+    border: 1px solid var(--border); /* 균일한 1px 테두리 두께 */
+    background: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
 }
 
 table {
-    border-collapse: separate; /* 칸들이 각자 고유의 테두리와 라운딩을 갖도록 설정 */
-    border-spacing: 8px; /* 칸 사이의 예쁜 간격 복구 */
+    border-collapse: collapse; /* 한 판으로 끈끈하게 결합 */
 }
 
 th {
-    width: 165px;
-    height: 64px;
+    width: 132px;
+    height: 88px;
     background: var(--header);
-    color: var(--header-text);
-    border: 1.5px solid var(--border);
-    border-radius: 12px; /* 헤더의 둥근 모서리 복구 */
-    font-size: 20px;
+    color: white;
+    border: 1px solid var(--border); /* 1px 단일 보더 */
+    font-size: 26px;
     font-weight: 600;
 }
 
 td {
-    width: 165px;
-    height: 64px;
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 12px; /* 셀의 둥근 모서리 복구 */
+    width: 132px;
+    height: 88px;
+    background: white;
+    border: 1px solid var(--border); /* 1px 단일 보더 */
     text-align: center;
-    font-size: 17px;
-    font-weight: 600;
+    font-size: 24px;
     cursor: pointer;
-    transition: background .18s, transform .12s, box-shadow .18s;
+    user-select: none;
+    transition: background .18s; /* 테두리를 깨뜨리는 transform 트랜지션 제거 */
 }
 
+/* 칸 분리 현상을 만드는 원인이었던 transform 효과 대신 투명도 강조로 변경 */
 td:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
-/* 대각선 비활성화 칸 */
 td.disabled {
-    background: #f3f3f3;
-    color: #b5b5b5;
+    background: #fafafa;
     cursor: default;
 }
 
 td.disabled:hover {
-    transform: none;
-    box-shadow: none;
+    background: #fafafa;
 }
 
 /* ------------------------
-   팔레트 팝업
+   선택 색 (클래스 방식 매칭)
+-------------------------*/
+td.otp    { background: var(--otp) !important; }
+td.good   { background: var(--good) !important; }
+td.normal { background: var(--normal) !important; }
+td.pass   { background: var(--pass) !important; }
+td.mine   { background: var(--mine) !important; }
+
+/* ------------------------
+   팝업 (Picker)
 -------------------------*/
 #picker {
     position: absolute;
     display: none;
     gap: 10px;
-    background: #fff;
-    padding: 10px;
-    border-radius: 999px;
-    border: 1px solid #ddd;
-    box-shadow: 0 12px 28px rgba(0,0,0,.15);
+    padding: 12px;
+    border-radius: 40px;
+    background: white;
+    box-shadow: 0 15px 35px rgba(0,0,0,.15);
     z-index: 999;
 }
 
 .pick {
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -133,74 +153,69 @@ td.disabled:hover {
     transform: scale(1.15);
 }
 
+/* JS 동적 버튼 생성 매칭용 배경 클래스 */
+.pick.otp    { background: var(--otp); }
+.pick.good   { background: var(--good); }
+.pick.normal { background: var(--normal); }
+.pick.pass   { background: var(--pass); }
+.pick.mine   { background: var(--mine); }
+
 .pick.clear {
-    background: #fff;
-    border: 2px solid #ccc;
+    background: white;
+    border: 2px solid #cfcfcf;
     position: relative;
 }
 
-.pick.clear::after {
-    content: "✕";
+.pick.clear::before {
+    content: "×";
     position: absolute;
     inset: 0;
     display: grid;
     place-items: center;
     color: #999;
-    font-size: 16px;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 /* ------------------------
-   모바일 반응형 (왼쪽 디자인 원형 유지 버전)
+   모바일 반응형 (900px 이하)
 -------------------------*/
-@media (max-width: 900px) {
+@media(max-width:900px) {
     body {
-        padding: 20px;
+        padding: 20px 10px;
     }
 
     h1 {
         font-size: 26px;
     }
 
-    .container {
-        width: 100%;
-        max-width: 500px;
-    }
-
     .table-wrapper {
         width: 100%;
-        padding: 8px;
-        overflow-x: auto; /* 화면 너비를 넘어갈 때 찌그러지지 않고 부드럽게 스크롤 되도록 유도 */
+        overflow-x: auto; /* 모바일에서 표가 절대 찌그러지지 않고 스크롤 되도록 유도 */
     }
 
-    /* 모바일에서도 고유의 간격과 모양이 깨지지 않게 방어 */
     table {
-        border-collapse: separate !important;
-        border-spacing: 5px !important; /* 모바일 전용 좁은 간격 */
-        width: max-content !important; /* 좁은 폭에서 찌그러지지 않도록 크기 고정 */
         margin: 0 auto;
+        width: max-content; /* 모바일에서 텍스트 가독 폭 강제 고정 */
     }
 
-    th {
-        width: 72px !important; /* 모바일에서 글자가 겹치지 않는 최소 적정 너비 */
-        height: 48px !important;
-        font-size: 13px !important;
-        border-radius: 8px !important;
+    th, td {
+        width: 74px;
+        height: 58px;
+        font-size: 15px;
+        border: 1px solid var(--border);
     }
 
-    td {
-        width: 72px !important;
-        height: 48px !important;
-        font-size: 12px !important;
-        border-radius: 8px !important;
-        padding: 0 !important;
-    }
-
-    .legend {
-        gap: 14px;
-        margin-bottom: 22px;
+    td:hover {
+        background-color: transparent; /* 모바일 터치 시 호버 부작용 방지 */
     }
 
     .legend-item {
-        font-size: 13px;
+        font-size: 15px;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
     }
 }
