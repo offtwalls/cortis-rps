@@ -49,7 +49,7 @@ h1 {
 }
 
 /* ------------------------
-   테이블 (PC 기준 기본값)
+   테이블 (PC 기준 - 왼쪽 오리지널 디자인)
 -------------------------*/
 .table-wrapper {
     background: #fff;
@@ -57,13 +57,11 @@ h1 {
     border-radius: 24px;
     padding: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,.08);
-    overflow: hidden; /* 표 외곽이 둥글게 깎이도록 설정 */
 }
 
 table {
-    border-collapse: collapse; /* 칸들을 빈틈없이 결합 */
-    width: 100%;
-    table-layout: fixed; /* 모든 칸의 너비를 균등하게 고정 */
+    border-collapse: separate; /* 칸들이 각자 고유의 테두리와 라운딩을 갖도록 설정 */
+    border-spacing: 8px; /* 칸 사이의 예쁜 간격 복구 */
 }
 
 th {
@@ -71,7 +69,8 @@ th {
     height: 64px;
     background: var(--header);
     color: var(--header-text);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
+    border-radius: 12px; /* 헤더의 둥근 모서리 복구 */
     font-size: 20px;
     font-weight: 600;
 }
@@ -80,12 +79,18 @@ td {
     width: 165px;
     height: 64px;
     background: #fff;
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
+    border-radius: 12px; /* 셀의 둥근 모서리 복구 */
     text-align: center;
     font-size: 17px;
     font-weight: 600;
     cursor: pointer;
-    transition: background .18s;
+    transition: background .18s, transform .12s, box-shadow .18s;
+}
+
+td:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
 }
 
 /* 대각선 비활성화 칸 */
@@ -93,6 +98,11 @@ td.disabled {
     background: #f3f3f3;
     color: #b5b5b5;
     cursor: default;
+}
+
+td.disabled:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 /* ------------------------
@@ -140,7 +150,7 @@ td.disabled {
 }
 
 /* ------------------------
-   모바일 반응형 (900px 이하)
+   모바일 반응형 (왼쪽 디자인 원형 유지 버전)
 -------------------------*/
 @media (max-width: 900px) {
     body {
@@ -152,41 +162,45 @@ td.disabled {
     }
 
     .container {
-        width: 100%; /* 모바일 화면 너비에 맞춤 */
-        max-width: 500px; /* 너무 퍼지지 않게 최대 적정폭 제한 */
+        width: 100%;
+        max-width: 500px;
     }
 
     .table-wrapper {
         width: 100%;
-        padding: 5px;
-        border-radius: 16px; /* 모바일 화면에 맞춰 외곽 반경 조정 */
+        padding: 8px;
+        overflow-x: auto; /* 화면 너비를 넘어갈 때 찌그러지지 않고 부드럽게 스크롤 되도록 유도 */
     }
 
+    /* 모바일에서도 고유의 간격과 모양이 깨지지 않게 방어 */
     table {
-        border-collapse: collapse !important;
-        table-layout: fixed !important; /* 모바일에서도 5개 칸 너비를 무조건 1:1:1:1:1 균등 분배 */
-        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 5px !important; /* 모바일 전용 좁은 간격 */
+        width: max-content !important; /* 좁은 폭에서 찌그러지지 않도록 크기 고정 */
+        margin: 0 auto;
     }
 
-    th, td {
-        width: calc(100% / 6) !important; /* 6개 컬럼(빈칸 포함)이 완벽히 균등 분할 */
-        height: 52px !important; /* 모바일 터치에 적당한 높이 */
+    th {
+        width: 72px !important; /* 모바일에서 글자가 겹치지 않는 최소 적정 너비 */
+        height: 48px !important;
         font-size: 13px !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 0 !important; /* 개별 칸의 라운딩 강제 제거 */
+        border-radius: 8px !important;
     }
 
-    td:hover {
-        transform: none !important;
-        box-shadow: none !important;
+    td {
+        width: 72px !important;
+        height: 48px !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+        padding: 0 !important;
     }
 
     .legend {
-        gap: 12px;
-        margin-bottom: 20px;
+        gap: 14px;
+        margin-bottom: 22px;
     }
 
     .legend-item {
-        font-size: 14px;
+        font-size: 13px;
     }
 }
