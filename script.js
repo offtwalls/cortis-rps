@@ -1,18 +1,16 @@
-// ==========================================
-// 1. 기본 데이터 설정 (멤버 및 커플링 명칭)
-// ==========================================
+// ===== 멤버 이름 =====
 const members = ["마틴", "제임스", "주훈", "성현", "건호"];
+
+// ===== 셀 내용 =====
 const labels = [
     ["", "젯틴", "훈틴", "엄틴", "껀틴"],
-    ["틴젯", "", "눟젯", "셩젯", "낭젯"],
-    ["틴훈", "젯쮸", "", "셩쮼", "낭쮼"],
+    ["틴젯", "", "눟젯", "성젯", "낭젯"],
+    ["틴훈", "젯쭈", "", "설쮼", "낭쮼"],
     ["틴셩", "젯셩", "쭈엄", "", "낭셩"],
-    ["틴껀", "젬껀", "쮸건", "엄껀", ""]
+    ["틴껀", "젬껀", "쭈건", "엄껀", ""]
 ];
 
-// ==========================================
-// 2. 범주(라벨 및 색상) 상태 관리
-// ==========================================
+// ===== 범례 데이터 상태 관리 (수정/삭제 연동용) =====
 const defaultCategories = [
     { id: "otp", name: "OTP", color: "#ffdee2" },
     { id: "good", name: "좋음", color: "#fcead2" },
@@ -21,131 +19,121 @@ const defaultCategories = [
     { id: "mine", name: "지뢰", color: "#dbf4fc" }
 ];
 
-// 로컬스토리지에서 기존 커스텀 설정을 불러오고, 없으면 기본값 사용
+// 로컬스토리지에 저장된 커스텀 범례 정보가 있으면 가져옴
 let categories = JSON.parse(localStorage.getItem("cortis_categories")) || defaultCategories;
 
-// DOM 요소 가져오기
 const table = document.getElementById("rpsTable");
 const picker = document.getElementById("picker");
-// CSS의 .legend 클래스를 사용하는 기존 영역을 가져오거나 자동으로 매칭합니다.
-let configContainer = document.querySelector(".legend");
+let configContainer = document.querySelector(".legend"); // HTML의 .legend 영역 선택
 
 let selectedCell = null;
 
-// ==========================================
-// 3. 상단 설정 바 및 픽커 팝업 생성
-// ==========================================
+// ===== [신규 추가] 상단 범례 편집창 및 팝업창 버튼 동적 생성 =====
 function initCategories() {
-    // 만약 HTML에 .legend 컨테이너가 없다면 표 위에 자동으로 생성하여 삽입합니다.
-    if (!configContainer) {
-        configContainer = document.createElement("div");
-        configContainer.className = "legend";
-        table.parentNode.insertBefore(configContainer, table);
-    }
+    if (!configContainer) return;
     
     configContainer.innerHTML = "";
-    picker.innerHTML = ""; // 기존 하드코딩된 버튼들 초기화
+    picker.innerHTML = ""; // 기존 HTML에 고정되어 있던 내부 버튼들 초기화
 
     categories.forEach((category) => {
-        // [A] 상단 CSS 스타일 맞춤 (.legend-item 구조 활용)
+        // 1. 상단 범례 커스텀 UI (색상변경, 이름수정, 삭제버튼) 생성
         const item = document.createElement("div");
         item.className = "legend-item";
-        item.style.cssText = "position: relative; display: flex; align-items: center; gap: 8px;";
+        item.style.cssText = "position: relative; display: flex; align-items: center; gap: 6px; padding-right: 12px;";
 
-        //기존 원형 아이콘을 color picker로 대체하고 글씨를 text input으로 대체
         item.innerHTML = `
-            <div style="position: relative; width: 20px; height: 20px; border-radius: 50%; overflow: hidden; border: 1.5px solid rgba(0,0,0,.08);">
+            <div style="position: relative; width: 20px; height: 20px; border-radius: 50%; overflow: hidden; border: 1px solid rgba(0,0,0,.15); flex-shrink: 0;">
                 <input type="color" value="${category.color}" data-id="${category.id}" class="category-color-input" 
                     style="position: absolute; top: -5px; left: -5px; width: 30px; height: 30px; border: none; padding: 0; cursor: pointer; background: transparent;">
             </div>
             <input type="text" value="${category.name}" data-id="${category.id}" class="category-name-input" 
-                style="width: 50px; border: none; border-bottom: 1px solid #ccc; text-align: center; font-size: 16px; font-weight: 500; font-family: inherit; outline: none; background: transparent; color: #333;">
+                style="width: 50px; border: none; border-bottom: 1px solid #ccc; text-align: center; font-size: 15px; font-weight: 500; font-family: inherit; outline: none; background: transparent; color: #333;">
+            <button class="category-delete-btn" data-id="${category.id}" 
+                style="border: none; background: transparent; color: #aaa; cursor: pointer; font-size: 11px; padding: 0 2px; font-weight: bold; margin-left: -2px; transition: color 0.15s;">✕</button>
         `;
         configContainer.appendChild(item);
 
-        // [B] 셀 클릭 시 뜰 팝업창(picker) 내부의 동그란 버튼(.pick) 동적 생성
+        // 2. 셀 클릭 시 뜰 팝업창(picker) 내부 선택 버튼 동적 생성
         const pickBtn = document.createElement("button");
         pickBtn.className = `pick ${category.id}`;
-        pickBtn.dataset.colorId = category.id;
-        pickBtn.style.backgroundColor = category.color; // 변경된 색상 반영용
+        pickBtn.dataset.color = category.id;
+        // 동적으로 변하는 색상을 CSS 변수(--otp 등)에 실시간 주입
+        document.documentElement.style.setProperty(`--${category.id}`, category.color);
         picker.appendChild(pickBtn);
     });
 
-    // [C] 기존 CSS 스타일에 맞춰 지우기(X) 버튼 추가
+    // 3. 팝업창에 지우기 버튼 추가
     const clearBtn = document.createElement("button");
     clearBtn.className = "pick clear";
-    clearBtn.dataset.colorId = "";
+    clearBtn.dataset.color = "";
     picker.appendChild(clearBtn);
 
-    // 인풋 및 버튼 이벤트 바인딩
-    bindCategoryEvents();
-    bindPickerEvents();
+    bindCategoryEvents(); // 범례 조작 이벤트 바인딩
+    bindPickerEvents();   // 팝업 선택 이벤트 바인딩
 }
 
-// ==========================================
-// 4. 상단 설정 인풋 실시간 동기화 이벤트
-// ==========================================
+// ===== [신규 추가] 범례 커스텀 이벤트 연결 =====
 function bindCategoryEvents() {
-    // 사용자가 색상 피커로 색을 변경할 때
+    // 실시간 색상 변경 이벤트
     document.querySelectorAll(".category-color-input").forEach(input => {
         input.addEventListener("input", (e) => {
             const id = e.target.dataset.id;
             const targetCat = categories.find(c => c.id === id);
             if (targetCat) {
                 targetCat.color = e.target.value;
-                saveCategories();
-                updateUI(); // 바뀐 색상 표와 팝업에 실시간 반영
+                localStorage.setItem("cortis_categories", JSON.stringify(categories));
+                // 색상 실시간 반영
+                document.documentElement.style.setProperty(`--${id}`, e.target.value);
             }
         });
     });
 
-    // 사용자가 라벨 텍스트를 변경할 때
+    // 실시간 이름 수정 이벤트
     document.querySelectorAll(".category-name-input").forEach(input => {
         input.addEventListener("input", (e) => {
             const id = e.target.dataset.id;
             const targetCat = categories.find(c => c.id === id);
             if (targetCat) {
                 targetCat.name = e.target.value;
-                saveCategories();
-                updateUI(); // 바뀐 글자 실시간 반영
+                localStorage.setItem("cortis_categories", JSON.stringify(categories));
             }
         });
     });
-}
 
-// 범주 데이터 로컬스토리지 저장
-function saveCategories() {
-    localStorage.setItem("cortis_categories", JSON.stringify(categories));
-}
+    // 범례 삭제 기능 이벤트
+    document.querySelectorAll(".category-delete-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const id = e.target.dataset.id;
+            if (categories.length <= 1) {
+                alert("최소 1개 이상의 범례는 남겨두어야 합니다.");
+                return;
+            }
 
-// 색상/글자 실시간 UI 업데이트 함수
-function updateUI() {
-    // 팝업창 버튼 배경색 실시간 동기화
-    document.querySelectorAll("#picker .pick").forEach(btn => {
-        const id = btn.dataset.colorId;
-        if (!id) return;
-        const cat = categories.find(c => c.id === id);
-        if (cat) {
-            btn.style.backgroundColor = cat.color;
-        }
+            categories = categories.filter(c => c.id !== id);
+            localStorage.setItem("cortis_categories", JSON.stringify(categories));
+
+            // 지워진 범례 색상이 칠해져 있던 표의 칸들도 실시간 초기화
+            document.querySelectorAll(".cell").forEach(cell => {
+                if (cell.classList.contains(id)) {
+                    cell.classList.remove(id);
+                    localStorage.removeItem(cell.dataset.id);
+                }
+            });
+
+            initCategories(); // 삭제 후 레이아웃 새로고침
+        });
+
+        btn.addEventListener("mouseenter", () => btn.style.color = "#ff4d4d");
+        btn.addEventListener("mouseleave", () => btn.style.color = "#aaa");
     });
-
-    // 표 내부 셀 색상 실시간 동기화
-    document.querySelectorAll(".cell").forEach(cell => {
-        const colorId = localStorage.getItem(cell.dataset.id);
-        if (colorId) {
-            const cat = categories.find(c => c.id === colorId);
-            cell.style.backgroundColor = cat ? cat.color : "";
-        }
-    });
 }
 
-// ==========================================
-// 5. 메인 표(Table) 생성 및 셀 선택
-// ==========================================
+// ===== 표 생성 =====
 function createTable() {
     let html = "<tr><th></th>";
-    members.forEach(name => { html += `<th>${name}</th>`; });
+    members.forEach(name => {
+        html += `<th>${name}</th>`;
+    });
     html += "</tr>";
 
     members.forEach((rowName, row) => {
@@ -155,7 +143,9 @@ function createTable() {
                 html += `<td class="disabled"></td>`;
             } else {
                 html += `
-                <td data-id="${row}-${col}" class="cell">
+                <td
+                    data-id="${row}-${col}"
+                    class="cell">
                     ${labels[row][col]}
                 </td>`;
             }
@@ -164,14 +154,15 @@ function createTable() {
     });
 
     table.innerHTML = html;
-    loadColors();     // 저장된 셀 색상 불러오기
-    bindCellEvents(); // 셀 클릭 이벤트 연결
+    loadColors();
+    bindEvents();
 }
 
-// 셀 클릭 시 팝업 띄우기
-function bindCellEvents() {
+// ===== 셀 클릭 =====
+function bindEvents() {
     document.querySelectorAll(".cell").forEach(cell => {
         cell.addEventListener("click", e => {
+            if (e.target.closest(".legend")) return; // 상단 영역 클릭 무시
             selectedCell = cell;
             picker.style.display = "flex";
             picker.style.left = `${e.pageX}px`;
@@ -180,23 +171,25 @@ function bindCellEvents() {
     });
 }
 
-// ==========================================
-// 6. 팝업창(Picker)에서 색상 선택 시 적용
-// ==========================================
+// ===== 색 선택 (동적 바인딩용 함수 분리) =====
 function bindPickerEvents() {
-    document.querySelectorAll("#picker .pick").forEach(btn => {
+    document.querySelectorAll(".pick").forEach(btn => {
+        btn.replaceWith(btn.cloneNode(true)); // 중복 이벤트 등록 버그 방지 전처리
+    });
+
+    document.querySelectorAll(".pick").forEach(btn => {
         btn.addEventListener("click", () => {
             if (!selectedCell) return;
 
-            const colorId = btn.dataset.colorId;
+            // 기존 배열 상태를 추적해 모든 클래스 유연하게 제거하도록 개선
+            defaultCategories.forEach(cat => selectedCell.classList.remove(cat.id));
 
-            if (colorId !== "") {
-                const cat = categories.find(c => c.id === colorId);
-                selectedCell.style.backgroundColor = cat ? cat.color : "";
-                localStorage.setItem(selectedCell.dataset.id, colorId);
+            const color = btn.dataset.color;
+
+            if (color !== "") {
+                selectedCell.classList.add(color);
+                localStorage.setItem(selectedCell.dataset.id, color);
             } else {
-                // '지우기' 선택 시
-                selectedCell.style.backgroundColor = "";
                 localStorage.removeItem(selectedCell.dataset.id);
             }
 
@@ -205,20 +198,17 @@ function bindPickerEvents() {
     });
 }
 
-// 저장된 표의 셀 색상 불러오기
+// ===== 저장 불러오기 =====
 function loadColors() {
     document.querySelectorAll(".cell").forEach(cell => {
-        const colorId = localStorage.getItem(cell.dataset.id);
-        if (colorId) {
-            const cat = categories.find(c => c.id === colorId);
-            if (cat) cell.style.backgroundColor = cat.color;
+        const color = localStorage.getItem(cell.dataset.id);
+        if (color) {
+            cell.classList.add(color);
         }
     });
 }
 
-// ==========================================
-// 7. 기타 유틸리티 이벤트 (바깥 클릭, ESC 키 종료)
-// ==========================================
+// ===== 바깥 클릭 시 닫기 =====
 window.addEventListener("click", e => {
     if (
         !picker.contains(e.target) &&
@@ -229,12 +219,13 @@ window.addEventListener("click", e => {
     }
 });
 
+// ===== ESC =====
 window.addEventListener("keydown", e => {
-    if (e.key === "Escape") picker.style.display = "none";
+    if (e.key === "Escape") {
+        picker.style.display = "none";
+    }
 });
 
-// ==========================================
-// 8. 초기 실행 코드
-// ==========================================
+// ===== 초기 기동 =====
 createTable();
 initCategories();
