@@ -27,7 +27,8 @@ let categories = JSON.parse(localStorage.getItem("cortis_categories")) || defaul
 // DOM 요소 가져오기
 const table = document.getElementById("rpsTable");
 const picker = document.getElementById("picker");
-let configContainer = document.getElementById("categoryConfig");
+// CSS의 .legend 클래스를 사용하는 기존 영역을 가져오거나 자동으로 매칭합니다.
+let configContainer = document.querySelector(".legend");
 
 let selectedCell = null;
 
@@ -35,11 +36,10 @@ let selectedCell = null;
 // 3. 상단 설정 바 및 픽커 팝업 생성
 // ==========================================
 function initCategories() {
-    // 만약 HTML에 categoryConfig 컨테이너가 없다면 표 위에 자동으로 생성하여 삽입합니다.
+    // 만약 HTML에 .legend 컨테이너가 없다면 표 위에 자동으로 생성하여 삽입합니다.
     if (!configContainer) {
         configContainer = document.createElement("div");
-        configContainer.id = "categoryConfig";
-        configContainer.style.cssText = "display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;";
+        configContainer.className = "legend";
         table.parentNode.insertBefore(configContainer, table);
     }
     
@@ -47,31 +47,34 @@ function initCategories() {
     picker.innerHTML = ""; // 기존 하드코딩된 버튼들 초기화
 
     categories.forEach((category) => {
-        // [A] 상단 색상+텍스트 설정 인풋 UI 생성
+        // [A] 상단 CSS 스타일 맞춤 (.legend-item 구조 활용)
         const item = document.createElement("div");
-        item.className = "config-item";
-        item.style.cssText = "display: flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid #eee; border-radius: 20px; background: #fff;";
+        item.className = "legend-item";
+        item.style.cssText = "position: relative; display: flex; align-items: center; gap: 8px;";
 
+        //기존 원형 아이콘을 color picker로 대체하고 글씨를 text input으로 대체
         item.innerHTML = `
-            <input type="color" value="${category.color}" data-id="${category.id}" class="category-color-input" style="width:24px; height:24px; border:none; border-radius:50%; cursor:pointer; padding:0;">
-            <input type="text" value="${category.name}" data-id="${category.id}" class="category-name-input" style="width:50px; border:none; border-bottom:1px solid #ccc; text-align:center; font-size:14px; font-weight:bold; outline:none; background:transparent;">
+            <div style="position: relative; width: 20px; height: 20px; border-radius: 50%; overflow: hidden; border: 1.5px solid rgba(0,0,0,.08);">
+                <input type="color" value="${category.color}" data-id="${category.id}" class="category-color-input" 
+                    style="position: absolute; top: -5px; left: -5px; width: 30px; height: 30px; border: none; padding: 0; cursor: pointer; background: transparent;">
+            </div>
+            <input type="text" value="${category.name}" data-id="${category.id}" class="category-name-input" 
+                style="width: 50px; border: none; border-bottom: 1px solid #ccc; text-align: center; font-size: 16px; font-weight: 500; font-family: inherit; outline: none; background: transparent; color: #333;">
         `;
         configContainer.appendChild(item);
 
-        // [B] 셀 클릭 시 뜰 팝업창(picker) 내부의 선택 버튼 동적 생성
+        // [B] 셀 클릭 시 뜰 팝업창(picker) 내부의 동그란 버튼(.pick) 동적 생성
         const pickBtn = document.createElement("button");
-        pickBtn.className = "pick";
+        pickBtn.className = `pick ${category.id}`;
         pickBtn.dataset.colorId = category.id;
-        pickBtn.style.backgroundColor = category.color;
-        pickBtn.innerText = category.name;
+        pickBtn.style.backgroundColor = category.color; // 변경된 색상 반영용
         picker.appendChild(pickBtn);
     });
 
-    // [C] 팝업창에 색상 '지우기' 버튼 추가
+    // [C] 기존 CSS 스타일에 맞춰 지우기(X) 버튼 추가
     const clearBtn = document.createElement("button");
     clearBtn.className = "pick clear";
     clearBtn.dataset.colorId = "";
-    clearBtn.innerText = "지우기";
     picker.appendChild(clearBtn);
 
     // 인풋 및 버튼 이벤트 바인딩
@@ -117,14 +120,13 @@ function saveCategories() {
 
 // 색상/글자 실시간 UI 업데이트 함수
 function updateUI() {
-    // 팝업창 버튼 갱신
+    // 팝업창 버튼 배경색 실시간 동기화
     document.querySelectorAll("#picker .pick").forEach(btn => {
         const id = btn.dataset.colorId;
         if (!id) return;
         const cat = categories.find(c => c.id === id);
         if (cat) {
             btn.style.backgroundColor = cat.color;
-            btn.innerText = cat.name;
         }
     });
 
@@ -221,7 +223,7 @@ window.addEventListener("click", e => {
     if (
         !picker.contains(e.target) &&
         !e.target.classList.contains("cell") &&
-        !e.target.closest("#categoryConfig")
+        !e.target.closest(".legend")
     ) {
         picker.style.display = "none";
     }
