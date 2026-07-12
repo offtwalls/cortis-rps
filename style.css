@@ -1,13 +1,8 @@
-/* ===========================
-   CORTIS RPS STYLE
-=========================== */
-
 :root {
     --header: #636363;
     --border: #4d4d4d;
     --bg: #f7f7f7;
 
-    /* JS와 실시간 연동을 위해 기본 컬러 설정 */
     --otp: #ffd8df;
     --good: #ffe9c8;
     --normal: #fff9cd;
@@ -26,17 +21,17 @@ body {
     font-family: Pretendard, "Noto Sans KR", sans-serif;
     display: flex;
     justify-content: center;
-    padding: 40px;
+    padding: 30px 20px; /* 상하 여백 살짝 축소 */
 }
 
 .container {
-    width: min(900px, 95vw);
+    width: min(720px, 95vw); /* 전체 컨테이너 최대 크기를 줄임 */
     text-align: center;
 }
 
 h1 {
-    font-size: 36px;
-    margin-bottom: 30px;
+    font-size: 28px; /* 타이틀 크기 축소 */
+    margin-bottom: 24px;
     font-weight: 700;
 }
 
@@ -46,64 +41,57 @@ h1 {
 .legend {
     display: flex;
     justify-content: center;
-    gap: 28px;
+    gap: 20px; /* 범례 간격 축소 */
     flex-wrap: wrap;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 20px;
-}
-
-.legend-color {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid rgba(0,0,0,.08);
+    gap: 6px;
+    font-size: 16px; /* 범례 폰트 크기 축소 */
 }
 
 /* ------------------------
-   테이블 (★칸 분리 완벽 차단)
+   테이블 (PC 기준 크기 전체 축소)
 -------------------------*/
 .table-wrapper {
     display: inline-block;
-    border-radius: 16px; /* 테두리 라운드 예쁘게 축소 */
-    overflow: hidden;    /* 라운드 안으로 표 외곽선 깔끔하게 가두기 */
-    border: 1px solid var(--border); /* 균일한 1px 테두리 두께 */
+    border-radius: 12px; /* 라운드 반경 슬림하게 조절 */
+    overflow: hidden;
+    border: 1px solid var(--border); /* 1px 테두리 두께 */
     background: white;
-    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
 }
 
 table {
-    border-collapse: collapse; /* 한 판으로 끈끈하게 결합 */
+    border-collapse: collapse; /* 칸 결합 고정 */
+    width: 100%;
 }
 
 th {
-    width: 132px;
-    height: 88px;
+    width: 100px; /* 기존 132px -> 100px로 대폭 축소 */
+    height: 64px; /* 기존 88px -> 64px로 축소 */
     background: var(--header);
     color: white;
-    border: 1px solid var(--border); /* 1px 단일 보더 */
-    font-size: 26px;
+    border: 1px solid var(--border);
+    font-size: 18px; /* 폰트 크기 축소 */
     font-weight: 600;
 }
 
 td {
-    width: 132px;
-    height: 88px;
+    width: 100px; /* 기존 132px -> 100px로 대폭 축소 */
+    height: 64px; /* 기존 88px -> 64px로 축소 */
     background: white;
-    border: 1px solid var(--border); /* 1px 단일 보더 */
+    border: 1px solid var(--border);
     text-align: center;
-    font-size: 24px;
+    font-size: 16px; /* 폰트 크기 축소 */
     cursor: pointer;
     user-select: none;
-    transition: background .18s; /* 테두리를 깨뜨리는 transform 트랜지션 제거 */
+    transition: background .15s;
 }
 
-/* 칸 분리 현상을 만드는 원인이었던 transform 효과 대신 투명도 강조로 변경 */
 td:hover {
     background-color: rgba(0, 0, 0, 0.04);
 }
@@ -113,13 +101,7 @@ td.disabled {
     cursor: default;
 }
 
-td.disabled:hover {
-    background: #fafafa;
-}
-
-/* ------------------------
-   선택 색 (클래스 방식 매칭)
--------------------------*/
+/* 선택 색 클래스 */
 td.otp    { background: var(--otp) !important; }
 td.good   { background: var(--good) !important; }
 td.normal { background: var(--normal) !important; }
@@ -132,17 +114,17 @@ td.mine   { background: var(--mine) !important; }
 #picker {
     position: absolute;
     display: none;
-    gap: 10px;
-    padding: 12px;
+    gap: 8px;
+    padding: 10px;
     border-radius: 40px;
     background: white;
-    box-shadow: 0 15px 35px rgba(0,0,0,.15);
+    box-shadow: 0 10px 25px rgba(0,0,0,.15);
     z-index: 999;
 }
 
 .pick {
-    width: 34px;
-    height: 34px;
+    width: 28px; /* 픽커 크기 아담하게 축소 */
+    height: 28px;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -153,7 +135,6 @@ td.mine   { background: var(--mine) !important; }
     transform: scale(1.15);
 }
 
-/* JS 동적 버튼 생성 매칭용 배경 클래스 */
 .pick.otp    { background: var(--otp); }
 .pick.good   { background: var(--good); }
 .pick.normal { background: var(--normal); }
@@ -173,49 +154,50 @@ td.mine   { background: var(--mine) !important; }
     display: grid;
     place-items: center;
     color: #999;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
 }
 
 /* ------------------------
-   모바일 반응형 (900px 이하)
+   모바일 반응형 (테두리 어긋남 완전 해결)
 -------------------------*/
-@media(max-width:900px) {
+@media(max-width: 900px) {
     body {
-        padding: 20px 10px;
+        padding: 15px 5px;
     }
 
     h1 {
-        font-size: 26px;
+        font-size: 22px;
     }
 
+    /* 겉 박스와 내부 표가 무조건 100% 동일하게 일치하도록 강제 결합 */
     .table-wrapper {
-        width: 100%;
-        overflow-x: auto; /* 모바일에서 표가 절대 찌그러지지 않고 스크롤 되도록 유도 */
+        width: 100% !important;
+        display: block !important; 
+        border-radius: 10px;
     }
 
     table {
-        margin: 0 auto;
-        width: max-content; /* 모바일에서 텍스트 가독 폭 강제 고정 */
+        width: 100% !important;
+        table-layout: fixed !important; /* 6개 열이 화면 비율에 맞춰 쪼개지도록 설정 */
     }
 
     th, td {
-        width: 74px;
-        height: 58px;
-        font-size: 15px;
-        border: 1px solid var(--border);
+        width: calc(100% / 6) !important; /* 화면 가로폭을 정확히 6등분하여 채움 */
+        height: 48px !important; /* 모바일 전용 아담한 높이 */
+        font-size: 13px !important; /* 모바일용 가독성 좋은 크기 */
+        border: 1px solid var(--border) !important;
     }
 
     td:hover {
-        background-color: transparent; /* 모바일 터치 시 호버 부작용 방지 */
+        background-color: transparent;
+    }
+
+    .legend {
+        gap: 12px;
     }
 
     .legend-item {
-        font-size: 15px;
-    }
-
-    .legend-color {
-        width: 20px;
-        height: 20px;
+        font-size: 13px;
     }
 }
